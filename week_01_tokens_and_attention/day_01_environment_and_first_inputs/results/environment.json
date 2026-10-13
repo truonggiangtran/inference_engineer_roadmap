@@ -1,0 +1,14 @@
+{
+  "python": "3.13.12",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "torch": "2.13.0+cpu",
+  "torch_cuda_runtime": null,
+  "transformers": null,
+  "cuda_available": false,
+  "gpu_name": null,
+  "compute_capability": null,
+  "torch_arch_list": null,
+  "driver": "610.88",
+  "nvcc": "Build cuda_13.3.r13.3/compiler.37862127_0",
+  "gpu_smoke_test": "BLOCKER: CUDA is not available on this system."
+}

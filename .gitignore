@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Large profiler traces and binaries stay local; other results/ files are committed.
+*.pt.trace.json
+*.trace.json
+*.nsys-rep
+*.ncu-rep
+*.qdrep
+*.sqlite
+week_03_gpu_execution_and_measurement/day_20_cuda_kernel_benchmark/saxpy
+week_03_gpu_execution_and_measurement/day_20_cuda_kernel_benchmark/saxpy_exercise
+*.exe

@@ -1,0 +1,7 @@
+# Install PyTorch first from the official selector so you get a CUDA build that supports
+# the RTX 5070 (sm_120): https://pytorch.org/get-started/locally/
+# Then: pip install -r requirements.txt
+torch>=2.7
+transformers>=4.56
+numpy
+matplotlib
