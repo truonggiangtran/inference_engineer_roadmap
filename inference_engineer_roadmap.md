@@ -43,14 +43,49 @@
 - **Day 27:** Assemble a clear, reproducible project and report.
 - **Day 28:** Demonstrate transferable understanding and choose the next step.
 
+### Week 5: Understand CUDA Graph Execution
+- **Stage goal:** Establish when capture/replay reduces submission overhead without changing results.
+- **Day 29:** Establish an eager baseline with explicit timing boundaries.
+- **Day 30:** Capture warmed-up operations and separate setup from replay cost.
+- **Day 31:** Update persistent input buffers and verify replay correctness.
+- **Day 32:** Sweep workload sizes to test the launch-overhead hypothesis.
+- **Day 33:** Use shape buckets and quantify padding and graph memory costs.
+- **Day 34:** Profile eager and replay execution separately from benchmark runs.
+- **Day 35:** Explain graph constraints, evidence, and limitations.
+
+### Week 6: Operate and Measure vLLM
+- **Stage goal:** Explain serving throughput and latency under controlled concurrent requests.
+- **Day 36:** Establish an isolated, reproducible localhost vLLM server.
+- **Day 37:** Measure streaming TTFT, response latency, and token throughput honestly.
+- **Day 38:** Observe continuous batching through a closed-loop concurrency sweep.
+- **Day 39:** Isolate prefix reuse and scheduler effects.
+- **Day 40:** Analyze latency distributions without overstating tail evidence.
+- **Day 41:** Compare graph-enabled and eager serving with one changed factor.
+- **Day 42:** Report a reproducible serving study with limitations.
+
+### Week 7: Compare SGLang with vLLM
+- **Stage goal:** Explain workload-specific differences between serving systems using matched evidence.
+- **Day 43:** Establish an isolated SGLang server with recorded settings.
+- **Day 44:** Reuse identical raw prompts, generation settings, and measurement boundaries.
+- **Day 45:** Test shared-prefix reuse with separately controlled cold and warm states.
+- **Day 46:** Compare latency and throughput only for compatible measurements.
+- **Day 47:** Investigate one difference using logs or a diagnostic profile.
+- **Day 48:** Assemble a reproducible, qualified framework comparison.
+- **Day 49:** Defend findings and choose a focused next systems experiment.
+
 
 ## Daily Study Routine
 
-The core schedule is **7 hours 15 minutes per week**, or **29 hours across 28 days**. Each week has five 60-minute sessions, one 90-minute practical session, and one 45-minute review. Use the remaining weekly budget for setup issues or unfinished exercises, not additional required topics.
+The foundation schedule is **29 hours across 28 days**. The three-week extension brings
+the full schedule to **49 days and 50 hours 45 minutes**, at **7 hours 15 minutes per week**.
+Each week has five 60-minute sessions, one 90-minute practical session, and one
+45-minute review. Treat difficult server setup as catch-up work, not a reason to
+skip correctness checks or invent measurements.
 
 For a 60-minute session, spend approximately 15 minutes on the indicated sections, 35 minutes on practice, and 10 minutes documenting results and answering the completion check. Do not read entire manuals or implement a complete LLM from scratch.
 
-Use this sequence throughout: **model concept -> Python/PyTorch operation -> tensor shapes -> GPU work -> observed result**. Reuse one small model and one environment throughout the month.
+Use this sequence throughout: **model concept -> Python/PyTorch operation -> tensor shapes -> GPU work -> observed result**. Reuse one small model throughout the foundation. Keep its environment for Week 5,
+then use separate release-compatible vLLM and SGLang environments for Weeks 6–7.
 
 If setup exceeds the first session, continue the initial tensor exercises on CPU and use catch-up time to resolve GPU access before the pretrained-model and profiling exercises. Do not describe CPU results as GPU measurements.
 
@@ -484,11 +519,75 @@ If setup exceeds the first session, continue the initial tensor exercises on CPU
 
 **Done when:** You can explain the complete forward pass and your measured tradeoffs, identify remaining gaps, and justify a focused next project.
 
+### Week 5: CUDA Graph Execution
+
+**Stage goal:** Measure capture/replay overhead reductions without confusing them
+with kernel fusion or kernel-internal optimization. Use the foundation PyTorch
+environment. CUDA-only experiments explicitly skip without CUDA; no CPU replacement
+is evidence for graph performance.
+
+| Day | Time | Goal and hands-on practice |
+| --- | --- | --- |
+| [29: Eager baseline](week_05_cuda_graphs/day_29_eager_baseline/README.md) | 60 min | Establish synchronized wall and CUDA-event timing with preallocated buffers. |
+| [30: Capture/replay](week_05_cuda_graphs/day_30_capture_and_replay/README.md) | 60 min | Warm up, capture, validate, and separate setup from steady-state replay. |
+| [31: Static buffers](week_05_cuda_graphs/day_31_static_buffers/README.md) | 60 min | Update persistent input storage and compare non-aliased expected outputs. |
+| [32: Size sweep](week_05_cuda_graphs/day_32_size_sweep/README.md) | 60 min | Vary element count at fixed launch count and test the overhead hypothesis. |
+| [33: Shape buckets](week_05_cuda_graphs/day_33_shape_buckets/README.md) | 60 min | Retain graphs for supported shapes and report padding/memory costs. |
+| [34: Diagnostic profile](week_05_cuda_graphs/day_34_profile_and_explain/README.md) | 90 min | Explain launch behavior using a trace collected separately from timing. |
+| [35: Graph review](week_05_cuda_graphs/day_35_graph_review/README.md) | 45 min | Defend numerical checks, timing boundaries, constraints and limitations. |
+
+Each linked daily guide contains knowledge notes, targeted references, practice,
+Linux commands and a completion check. This is the detailed extension schedule;
+the links avoid duplicating instructions between this document and the exercises.
+
+### Week 6: vLLM Serving
+
+**Stage goal:** Operate one serving runtime deeply enough to explain its
+throughput–latency tradeoffs. Use an isolated native Linux environment, a
+release-compatible Blackwell stack, one GPU and the same small model.
+
+| Day | Time | Goal and hands-on practice |
+| --- | --- | --- |
+| [36: Server setup](week_06_vllm_serving/day_36_server_setup/README.md) | 60 min | Record revisions/dependencies, launch on localhost, and verify readiness. |
+| [37: Streaming metrics](week_06_vllm_serving/day_37_streaming_metrics/README.md) | 60 min | Inspect first-content latency, completion time, chunks and actual usage. |
+| [38: Concurrency sweep](week_06_vllm_serving/day_38_concurrency_sweep/README.md) | 60 min | Measure closed-loop concurrency 1/2/4/8 with a fixed manifest. |
+| [39: Cache/scheduler](week_06_vllm_serving/day_39_cache_and_scheduler/README.md) | 60 min | Isolate one feature and distinguish first-request cold state from reuse. |
+| [40: Tail latency](week_06_vllm_serving/day_40_tail_latency/README.md) | 60 min | Analyze repeated larger runs without turning sample p95 into an SLO. |
+| [41: Graph ablation](week_06_vllm_serving/day_41_graph_ablation/README.md) | 90 min | Compare default/eager execution and disclose compilation/backend coupling. |
+| [42: Serving report](week_06_vllm_serving/day_42_serving_report/README.md) | 45 min | Assemble reproducible findings with explicit metric/load boundaries. |
+
+The [shared client contract](week_06_vllm_serving/common/README.md) defines
+client-visible TTFT, E2E and aggregate output throughput. Streaming chunks are not
+necessarily tokens: chunk gaps and post-first-chunk approximations must not be
+reported as true per-token ITL. Use server-native instrumentation for true ITL.
+
+### Week 7: SGLang and Controlled Comparison
+
+**Stage goal:** Explain workload-specific runtime differences using matched work
+and one shared measurement client. Run only one server at a time.
+
+| Day | Time | Goal and hands-on practice |
+| --- | --- | --- |
+| [43: Server setup](week_07_sglang_comparison/day_43_server_setup/README.md) | 60 min | Establish a separate SGLang environment and record effective settings. |
+| [44: Matched workload](week_07_sglang_comparison/day_44_matched_workload/README.md) | 60 min | Reuse raw prompts, revisions and settings; verify actual token lengths. |
+| [45: Prefix reuse](week_07_sglang_comparison/day_45_prefix_reuse/README.md) | 60 min | Test shared/divergent prefixes and explicitly controlled cache states. |
+| [46: Comparison gate](week_07_sglang_comparison/day_46_compare_measurements/README.md) | 60 min | Reject mismatched work before reporting a comparison table. |
+| [47: Investigate](week_07_sglang_comparison/day_47_investigate_difference/README.md) | 60 min | Test one explanation using logs, metrics or a separate diagnostic trace. |
+| [48: Reproduce](week_07_sglang_comparison/day_48_reproduction_report/README.md) | 90 min | Assemble a report and reproduce one condition per framework. |
+| [49: Final review](week_07_sglang_comparison/day_49_final_review/README.md) | 45 min | Defend findings and choose a falsifiable next systems experiment. |
+
+Report actual prompt/output lengths, EOS behavior, environment freezes, full server
+commands, memory/cache budgets, dtype, revisions, warmup, graph policy and cache-state
+procedure. Similar flag names or memory fractions do not establish identical
+effective behavior. A default-versus-default comparison is useful but does not
+isolate a single algorithm. No universal framework ranking is required.
+
 ## Reusable Practice Documents
 
 ### Daily Practice Note Template
 
-Use this short template for each day. A section in one notebook or Markdown workbook is sufficient; you do not need 28 separate documents.
+Use this short template for each day. A section in one notebook or Markdown workbook
+is sufficient; the day-folder READMEs and review worksheets supply the practice structure.
 
 ```text
 Day and topic:
@@ -585,6 +684,24 @@ The factor of two accounts for keys and values. This estimates logical cache ten
 5. What limitation prevents generalizing the result to all models, GPUs, or serving workloads?
 6. What is the smallest next experiment that could test your strongest remaining hypothesis?
 
+**Week 5**
+1. What overhead does graph replay reduce, and what does it not change inside a kernel?
+2. Why must captured storage remain alive, and why clone a reference output?
+3. Which costs are excluded from replay timing?
+4. When do shape buckets add padding and memory costs?
+
+**Week 6**
+1. How do continuous batching, paged KV storage and prefix reuse differ?
+2. What does client TTFT include that a GPU prefill timer excludes?
+3. Why are stream chunks not necessarily tokens?
+4. What can a closed-loop concurrency sweep establish, and what can it not establish?
+
+**Week 7**
+1. How did you verify both systems performed comparable actual work?
+2. What exactly did cold and warm mean in your protocol?
+3. Which configuration differences remain coupled?
+4. What evidence supports your recommendation, and what would change it?
+
 ## Detailed Reference Index
 
 These are reference documents, not a requirement to complete every linked tutorial or paper. Follow the targeted reading described for each day. Match API details to the versions recorded in your environment.
@@ -619,6 +736,13 @@ These are reference documents, not a requirement to complete every linked tutori
 - [CUDA best practices][CUDA-BEST]: memory traffic, performance measurement, and optimization principles.
 - [Nsight Systems user guide][NSIGHT-SYSTEMS] and [Nsight Compute profiling guide][NSIGHT-COMPUTE]: timeline analysis versus kernel-level analysis.
 - [Matplotlib quick start][PLOT-QUICKSTART]: simple labeled result plots.
+
+### Graph Execution and Serving Systems
+
+- [NVIDIA CUDA Graphs](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cuda-graphs.html): submission, capture, dependencies, instantiation and replay.
+- [PyTorch CUDA Graphs](https://docs.pytorch.org/docs/stable/notes/cuda.html#cuda-graphs): warmup, persistent storage, constraints and memory pools.
+- [vLLM installation](https://docs.vllm.ai/en/stable/getting_started/installation/gpu/), [serve arguments](https://docs.vllm.ai/en/stable/cli/serve/) and [prefix caching](https://docs.vllm.ai/en/stable/features/automatic_prefix_caching/): use the chosen release's compatible stack and effective settings.
+- [SGLang installation](https://docs.sglang.io/get_started/install.html), [server arguments](https://docs.sglang.io/advanced_features/server_arguments.html) and [requests](https://docs.sglang.io/basic_usage/send_request.html): isolated setup, cache/graph settings and compatible endpoints.
 
 [PY-INTRO]: https://docs.python.org/3/tutorial/introduction.html
 [PY-CONTROL]: https://docs.python.org/3/tutorial/controlflow.html

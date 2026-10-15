@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+import transformers
 
 import torch
 
@@ -33,46 +34,41 @@ def environment_report() -> dict:
     run_command(["nvidia-smi", "--query-gpu=driver_version", "--format=csv,noheader"]),
     run_command(["nvcc", "--version"]).
     """
-    try:
-        return {
-            "python": platform.python_version(),
-            "platform": platform.platform(),
-            "torch": torch.__version__,
-            "torch_cuda_runtime": torch.version.cuda,
-            "transformers": transformers.__version__ if "transformers" in sys.modules else None,
-            "cuda_available": torch.cuda.is_available(),
-            "gpu_name": torch.cuda.get_device_name(0) if torch.cuda.is_available() else None,
-            "compute_capability": torch.cuda.get_device_capability(0) if torch.cuda.is_available() else None,
-            "torch_arch_list": torch.cuda.get_arch_list() if torch.cuda.is_available() else None,
-            "driver": run_command(["nvidia-smi", "--query-gpu=driver_version", "--format=csv,noheader"]),
-            "nvcc": run_command(["nvcc", "--version"]),
-        }
-    except Exception as e:
-        print(f"Error occurred while collecting environment information: {e}")
+
+    return {
+        "python": platform.python_version(),
+        "platform": platform.platform(),
+        "torch": torch.__version__,
+        "torch_cuda_runtime": torch.version.cuda,
+        "transformers": transformers.__version__ if "transformers" in sys.modules else None,
+        "cuda_version": torch.version.cuda,
+        "cuda_available": torch.cuda.is_available(),
+        "gpu_name": torch.cuda.get_device_name(0) if torch.cuda.is_available() else None,
+        "compute_capability": torch.cuda.get_device_capability(0) if torch.cuda.is_available() else None,
+        "torch_arch_list": torch.cuda.get_arch_list() if torch.cuda.is_available() else None,
+        "driver": run_command(["nvidia-smi", "--query-gpu=driver_version", "--format=csv,noheader"]),
+        "nvcc": run_command(["nvcc", "--version"]),
+    }
 
 
 def token_ids_to_tensor(token_ids: list[int]) -> torch.Tensor:
     """TODO: return an int64 tensor shaped [1, len(token_ids)] (a batch of one sequence)."""
-    try:
-        return torch.tensor([token_ids], dtype=torch.int64)
-    except Exception as e:
-        print(f"Error occurred while converting token IDs to tensor: {e}")
+    return torch.tensor([token_ids], dtype=torch.int64)
 
 
 def gpu_smoke_test() -> str:
     """TODO: if CUDA is available, move a small tensor to the GPU, compute something
     (for example, x * 2 + 1), synchronize, and return a description of the result.
     Otherwise return a string beginning with "BLOCKER:" that explains why."""
+    if not torch.cuda.is_available():
+        return "BLOCKER: CUDA is not available."
     try:
-        if not torch.cuda.is_available():
-            return "BLOCKER: CUDA is not available on this system."
-        device = torch.device("cuda")
-        x = torch.tensor([1.0, 2.0, 3.0], device=device)
-        result = x * 2 + 1
+        x = torch.arange(4, dtype=torch.float32, device="cuda")
+        y = x * 2 + 1
         torch.cuda.synchronize()
-        return f"GPU smoke test successful: {result.cpu().numpy()}"
+        return f"Success on {torch.cuda.get_device_name(0)}: {y.cpu().tolist()}"
     except Exception as e:
-        return f"BLOCKER: {e}"
+        return f"BLOCKER: GPU test failed with error: {e}"
 
 
 def main() -> None:
